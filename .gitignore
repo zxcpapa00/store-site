@@ -2,3 +2,5 @@ venv
 .idea
 manage.py
 db.sqlite3
+store/__pycache__
+products/__pycache__
