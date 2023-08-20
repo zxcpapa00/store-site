@@ -2,3 +2,13 @@ venv
 .idea
 manage.py
 db.sqlite3
+
+products/migrations
+users/migrations
+
+store/__pycache__/
+products/__pycache__/
+products/fixtures
+__pycache__/
+media/
+
