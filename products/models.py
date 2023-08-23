@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import User
 
 
 class Category(models.Model):
@@ -34,5 +35,26 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
+
+
+class BasketQuerySet(models.QuerySet):
+    def total_sum(self):
+        return sum(basket.sum_price() for basket in self)
+
+
+class Basket(models.Model):
+    """Корзина"""
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(default=0)
+    create_time = models.DateTimeField(auto_now_add=True)
+    objects = BasketQuerySet.as_manager()
+
+    def __str__(self):
+        return f'Корзина для - {self.user.username} | Товар {self.product.name}'
+
+    def sum_price(self):
+        return self.product.price * self.quantity
+
 
 

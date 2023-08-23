@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 def get_image_path(instance, filename):
-    return 'users/{0}/{1}'.format(instance.user.name, filename)
+    return 'users/{0}/{1}'.format(instance.username, filename)
 
 
 class User(AbstractUser):
