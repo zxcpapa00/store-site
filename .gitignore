@@ -4,6 +4,7 @@ manage.py
 db.sqlite3
 .env
 .flake8
+requirements.txt
 
 products/migrations
 users/migrations
