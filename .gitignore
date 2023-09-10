@@ -2,6 +2,8 @@ venv
 .idea
 manage.py
 db.sqlite3
+.env
+.flake8
 
 products/migrations
 users/migrations

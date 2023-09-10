@@ -1,28 +1,39 @@
-from django.core.paginator import Paginator
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from .models import *
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.http import HttpResponseRedirect
+from django.views.generic import ListView, TemplateView
+
+from common.views import TitleMixin
+
+from .models import Basket, Category, Product
 
 
-def index(request):
-    context = {
-        'title': 'Главная страница',
-        'user': request.user
-    }
-    return render(request, 'products/index.html', context)
+class IndexView(TitleMixin, TemplateView):
+    template_name = 'products/index.html'
+    title = 'Главная страница'
 
 
-def products(request, category_name=None, page=1):
-    products = Product.objects.filter(category__name=category_name) if category_name else Product.objects.all()
-    paginator = Paginator(object_list=products, per_page=2)
-    products_paginator = paginator.page(page)
-    context = {
-        'title': 'Каталог',
-        'categories': Category.objects.all(),
-        'products': products_paginator,
-    }
-    return render(request, 'products/products.html', context)
+class ProductListView(TitleMixin, ListView):
+    model = Product
+    template_name = 'products/products.html'
+    paginate_by = 2
+    context_object_name = 'products'
+    title = 'Каталог'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        categories = cache.get('categories')
+        if not categories:
+            context['categories'] = Category.objects.all()
+            cache.set('categories', context['categories'], 30)
+        else:
+            context['categories'] = categories
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category_name = self.kwargs.get('category_name')
+        return queryset.filter(category__name=category_name) if category_name else queryset
 
 
 @login_required
@@ -46,6 +57,3 @@ def basket_remove(request, basket_id):
     basket = Basket.objects.get(id=basket_id)
     basket.delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-
-
